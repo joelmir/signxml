@@ -353,7 +353,9 @@ class xmldsig(object):
             transforms = SubElement(reference, ds_tag("Transforms"))
             SubElement(transforms, ds_tag("Transform"), Algorithm=XMLDSIG_NS + "enveloped-signature")
             SubElement(transforms, ds_tag("Transform"), Algorithm=c14n_algorithm)
-        digest_method = SubElement(reference, ds_tag("DigestMethod"), Algorithm=self.known_digest_tags[self.digest_alg])
+        
+        algorithm_id = next((key for key, value in self.known_digest_methods.items() if value == self.known_digest_tags[self.digest_alg]), None)
+        digest_method = SubElement(reference, ds_tag("DigestMethod"), Algorithm=algorithm_id)
         digest_value = SubElement(reference, ds_tag("DigestValue"))
         digest_value.text = self.digest
         signature_value = SubElement(self.sig_root, ds_tag("SignatureValue"))
