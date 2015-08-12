@@ -344,9 +344,9 @@ class xmldsig(object):
         signed_info = SubElement(self.sig_root, ds_tag("SignedInfo"), nsmap=self.namespaces)
         c14n_method = SubElement(signed_info, ds_tag("CanonicalizationMethod"), Algorithm=c14n_algorithm)
         if self.signature_alg.startswith("hmac-"):
-            algorithm_id = self.known_hmac_digest_tags[self.signature_alg]()
+            algorithm_id = self.known_hmac_digest_tags[self.signature_alg]
         else:
-            algorithm_id = self.known_signature_digest_tags[self.signature_alg]()
+            algorithm_id = next((key for key, value in known_signature_digest_methods.items() if value == known_signature_digest_tags[self.signature_alg]), None)
         signature_method = SubElement(signed_info, ds_tag("SignatureMethod"), Algorithm=algorithm_id)
         reference = SubElement(signed_info, ds_tag("Reference"), URI=self._reference_uri)
         if method == methods.enveloped:
