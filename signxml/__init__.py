@@ -187,7 +187,7 @@ class xmldsig(object):
             known_tags = self.known_digest_tags
         if digest_algorithm_tag not in known_tags.keys():
             raise InvalidInput('Algorithm tag "{0}" is not recognized'.format(digest_algorithm_tag))
-        return self._get_digest_method(digest_algorithm_tag, methods=methods)
+        return self._get_digest_method(digest_algorithm_tag, methods=known_tags)
 
     def _get_hmac_digest_method(self, hmac_algorithm_id):
         return self._get_digest_method(hmac_algorithm_id, methods=self.known_hmac_digest_methods)
