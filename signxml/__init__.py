@@ -370,7 +370,7 @@ class xmldsig(object):
             signature_value.text = ensure_str(b64encode(signer.finalize()))
             self.sig_root.append(signature_value)
         elif self.signature_alg.startswith("dsa-") or self.signature_alg.startswith("rsa-") or self.signature_alg.startswith("ecdsa-"):
-            if isinstance(self.key, (str, bytes)):
+            if isinstance(self.key, bytes):
                 from cryptography.hazmat.primitives.serialization import load_pem_private_key
                 key = load_pem_private_key(self.key, password=passphrase, backend=default_backend())
             else:
