@@ -128,9 +128,16 @@ class xmldsig(object):
         XMLDSIG_MORE_NS + "ecdsa-sha512": SHA512,
         XMLDSIG11_NS + "dsa-sha256": SHA256,
     }
-    known_digest_tags = {method.split("#")[1]: method for method in known_digest_methods}
-    known_hmac_digest_tags = {method.split("#")[1]: method for method in known_hmac_digest_methods}
-    known_signature_digest_tags = {method.split("#")[1]: method for method in known_signature_digest_methods}
+    
+    known_digest_tags = {}
+    for key, value in known_digest_methods.items():
+        known_digest_tags[key.split("#")[1]] = value
+    known_hmac_digest_tags = {}
+    for key, value in known_hmac_digest_methods.items():
+        known_hmac_digest_tags[key.split("#")[1]] = value
+    known_signature_digest_tags = {}
+    for key, value in known_signature_digest_methods.items():
+        known_signature_digest_tags[key.split("#")[1]] = value
 
     # See https://tools.ietf.org/html/rfc5656
     known_ecdsa_curves = {
@@ -147,16 +154,18 @@ class xmldsig(object):
         "urn:oid:1.3.132.0.37": ec.SECT409R1,
         "urn:oid:1.3.132.0.38": ec.SECT571K1,
     }
-    known_ecdsa_curve_oids = {ec().name: oid for oid, ec in known_ecdsa_curves.items()}
+    known_ecdsa_curve_oids = {}
+    for oid, ec in known_ecdsa_curves.items():
+         known_ecdsa_curve_oids[ec().name] = oid
 
-    known_c14n_algorithms = {
+    known_c14n_algorithms = [
         "http://www.w3.org/TR/2001/REC-xml-c14n-20010315",
         "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments",
         "http://www.w3.org/2001/10/xml-exc-c14n#",
         "http://www.w3.org/2001/10/xml-exc-c14n#WithComments",
         "http://www.w3.org/2006/12/xml-c14n11",
         "http://www.w3.org/2006/12/xml-c14n11#WithComments"
-    }
+    ]
     default_c14n_algorithm = "http://www.w3.org/2006/12/xml-c14n11"
 
     def _get_digest(self, data, digest_algorithm):
@@ -167,15 +176,15 @@ class xmldsig(object):
     def _get_digest_method(self, digest_algorithm_id, methods=None):
         if methods is None:
             methods = self.known_digest_methods
-        if digest_algorithm_id not in methods:
-            raise InvalidInput('Algorithm "{}" is not recognized'.format(digest_algorithm_id))
+        if digest_algorithm_id not in methods.keys():
+            raise InvalidInput('Algorithm "{0}" is not recognized'.format(digest_algorithm_id))
         return methods[digest_algorithm_id]()
 
     def _get_digest_method_by_tag(self, digest_algorithm_tag, methods=None, known_tags=None):
         if known_tags is None:
             known_tags = self.known_digest_tags
-        if digest_algorithm_tag not in known_tags:
-            raise InvalidInput('Algorithm tag "{}" is not recognized'.format(digest_algorithm_tag))
+        if digest_algorithm_tag not in known_tags.keys():
+            raise InvalidInput('Algorithm tag "{0}" is not recognized'.format(digest_algorithm_tag))
         return self._get_digest_method(known_tags[digest_algorithm_tag], methods=methods)
 
     def _get_hmac_digest_method(self, hmac_algorithm_id):
@@ -212,7 +221,7 @@ class xmldsig(object):
             self._reference_uri = ""
         elif method == methods.detached:
             if self._reference_uri is None:
-                self._reference_uri = "#{}".format(self.payload.get("Id", self.payload.get("ID", "object")))
+                self._reference_uri = "#{0}".format(self.payload.get("Id", self.payload.get("ID", "object")))
         else:
             self.payload = Element(ds_tag("Object"), nsmap=self.namespaces, Id="object")
             if isinstance(self.data, (str, bytes)):
@@ -321,7 +330,7 @@ class xmldsig(object):
         self._reference_uri = reference_uri
 
         if not isinstance(method, methods):
-            raise InvalidInput("Unknown signature method {}".format(method))
+            raise InvalidInput("Unknown signature method {0}".format(method))
 
         if isinstance(cert, (str, bytes)):
             cert_chain = [cert]
@@ -451,18 +460,18 @@ class xmldsig(object):
             # doc_root.xpath(uri.lstrip("#"))[0]
         elif uri.startswith("#"):
             for id_attribute in self.id_attributes:
-                results = doc_root.xpath("..//*[@{}=$uri]".format(id_attribute), uri=uri.lstrip("#"))
+                results = doc_root.xpath("..//*[@{0}=$uri]".format(id_attribute), uri=uri.lstrip("#"))
                 if len(results) > 1:
-                    raise InvalidInput("Ambiguous reference URI {} resolved to {} nodes".format(uri, len(results)))
+                    raise InvalidInput("Ambiguous reference URI {0} resolved to {1} nodes".format(uri, len(results)))
                 elif len(results) == 1:
                     return results[0]
-            raise InvalidInput("Unable to resolve reference URI: {}".format(uri))
+            raise InvalidInput("Unable to resolve reference URI: {0}".format(uri))
         else:
             if uri_resolver is None:
-                raise InvalidInput("External URI dereferencing is not configured: {}".format(uri))
+                raise InvalidInput("External URI dereferencing is not configured: {0}".format(uri))
             result = uri_resolver(uri)
             if result is None:
-                raise InvalidInput("Unable to resolve reference URI: {}".format(uri))
+                raise InvalidInput("Unable to resolve reference URI: {0}".format(uri))
             return result
 
     def _get_inclusive_ns_prefixes(self, transform_node):
