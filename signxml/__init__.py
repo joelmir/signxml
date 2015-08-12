@@ -23,8 +23,6 @@ from .util import bytes_to_long, long_to_bytes, strip_pem_header, add_pem_header
 
 methods = Enum("Methods", "enveloped enveloping detached")
 
-SHA1 = ''
-
 class DERSequenceOfIntegers(univ.SequenceOf):
     componentType = univ.Integer()
     def __init__(self, integers):
