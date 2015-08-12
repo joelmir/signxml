@@ -177,7 +177,7 @@ class xmldsig(object):
         if methods is None:
             methods = self.known_digest_methods
         if digest_algorithm_id not in methods.keys():
-            raise InvalidInput('Algorithm "{0}" is not recognized'.format(digest_algorithm_id))
+            raise InvalidInput('Algorithm "{0}" is not recognized. Options: {1}'.format(digest_algorithm_id, methods.keys()))
         return methods[digest_algorithm_id]()
 
     def _get_digest_method_by_tag(self, digest_algorithm_tag, methods=None, known_tags=None):
