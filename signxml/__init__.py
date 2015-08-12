@@ -93,8 +93,8 @@ class xmldsig(object):
         self.signature_alg = None
         self._namespaces = dict(ds=XMLDSIG_NS)
         self.data = data
-
-        if isinstance(data, stdlibElementTree.Element):
+        
+        if not isinstance(data, type(stdlibElementTree.Element(None))):
             # TODO: add debug level logging statement re: performance impact here
             self.data = fromstring(stdlibElementTree.tostring(data, encoding="utf-8"))
 
